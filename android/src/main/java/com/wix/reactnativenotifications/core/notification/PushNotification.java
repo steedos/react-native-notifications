@@ -1,11 +1,14 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -16,12 +19,13 @@ import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
+import com.wix.reactnativenotifications.helpers.PushNotificationHelper;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
+import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
 public class PushNotification implements IPushNotification {
-
     final protected Context mContext;
     final protected AppLifecycleFacade mAppLifecycleFacade;
     final protected AppLaunchHelper mAppLaunchHelper;
@@ -73,8 +77,44 @@ public class PushNotification implements IPushNotification {
     }
 
     @Override
+    public void onScheduleRequest(Integer notificationId) {
+        Bundle bundle = mNotificationProps.asBundle();
+
+        if (bundle.getString("message") == null) {
+            Log.e(LOGTAG, "No message specified for the scheduled notification");
+            return;
+        }
+
+        double date = bundle.getDouble("fireDate");
+        if (date == 0) {
+            Log.e(LOGTAG, "No date specified for the scheduled notification");
+            return;
+        }
+
+        PushNotificationHelper helper = PushNotificationHelper.getInstance(mContext);
+        boolean isSaved = helper.savePreferences(Integer.toString(notificationId), mNotificationProps);
+        if (!isSaved) {
+            Log.e(LOGTAG, "Failed to save preference for notificationId " + notificationId);
+        }
+
+        PendingIntent pendingIntent = helper.toScheduleNotificationIntent(bundle);
+
+        long fireDate = (long) date;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            helper.getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
+        } else {
+            helper.getAlarmManager().set(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
+        }
+    }
+
+    @Override
     public PushNotificationProps asProps() {
         return mNotificationProps.copy();
+    }
+
+    public void sendNotificationScheduled(Integer notificationId) {
+        postNotification(notificationId);
     }
 
     protected int postNotification(Integer notificationId) {
@@ -152,6 +192,9 @@ public class PushNotification implements IPushNotification {
     }
 
     protected void postNotification(int id, Notification notification) {
+        PushNotificationHelper helper = PushNotificationHelper.getInstance(mContext);
+        helper.removePreference(String.valueOf(id));
+
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(id, notification);
     }

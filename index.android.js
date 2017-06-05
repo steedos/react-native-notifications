@@ -55,8 +55,22 @@ export class NotificationsAndroid {
     return id;
   }
 
+  static scheduleLocalNotification(notification: Object) {
+      const id = Math.random() * 100000000 | 0; // Bitwise-OR forces value onto a 32bit limit
+      RNNotifications.scheduleLocalNotification(notification, id);
+      return id;
+  }
+
   static cancelLocalNotification(id) {
     RNNotifications.cancelLocalNotification(id);
+  }
+
+  static cancelAllLocalNotifications() {
+      RNNotifications.cancelAllLocalNotifications();
+  }
+
+  static setBadgesCount(count: number) {
+      RNNotifications.setApplicationIconBadgeNumber(count);
   }
 }
 

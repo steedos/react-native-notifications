@@ -26,5 +26,9 @@ public interface IPushNotification {
      */
     int onPostRequest(Integer notificationId);
 
+    void onScheduleRequest(Integer notificationId);
+
+    void sendNotificationScheduled(Integer notificationId);
+
     PushNotificationProps asProps();
 }
