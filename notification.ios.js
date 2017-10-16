@@ -10,7 +10,7 @@ export default class IOSNotification {
   constructor(notification: Object) {
     this._data = {};
 
-    if (notification.aps &&
+    if (notification && notification.aps &&
       notification.aps["content-available"] &&
       notification.aps["content-available"] === 1 &&
       !notification.aps.alert &&
