@@ -24,6 +24,7 @@ export default class IOSNotification {
       this._type = "managed";
       this._thread = notification.aps["thread-id"];
     } else if (
+      notification &&
       notification.aps &&
       notification.aps.alert) {
       // regular notification
