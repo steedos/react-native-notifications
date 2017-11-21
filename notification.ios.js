@@ -36,9 +36,11 @@ export default class IOSNotification {
       this._thread = notification.aps["thread-id"];
     }
 
-    Object.keys(notification).filter(key => key !== "aps").forEach(key => {
-      this._data[key] = notification[key];
-    });
+    if (notification) {
+        Object.keys(notification).filter(key => key !== "aps").forEach(key => {
+            this._data[key] = notification[key];
+        });
+    }
   }
 
   getMessage(): ?string | ?Object {
