@@ -160,6 +160,10 @@ export default class NotificationsIOS {
     _actionHandlers.clear();
   }
 
+  static getBadgesCount(callback: Function) {
+    NativeRNNotifications.getBadgesCount(callback);
+  }
+
   static setBadgesCount(count: number) {
     NativeRNNotifications.setBadgesCount(count);
   }
@@ -178,6 +182,15 @@ export default class NotificationsIOS {
 
   static log(message: string) {
     NativeRNNotifications.log(message);
+  }
+
+  static async getInitialNotification() {
+    const notification = await NativeRNNotifications.getInitialNotification();
+    if (notification) {
+      return new IOSNotification(notification);
+    } else {
+      return undefined;
+    }
   }
 
   /**

@@ -214,7 +214,8 @@ RCT_EXPORT_MODULE()
                                                object:nil];
 
     [RNNotificationsBridgeQueue sharedInstance].openedRemoteNotification = [_bridge.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
-    [RNNotificationsBridgeQueue sharedInstance].openedLocalNotification = [_bridge.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey];
+    UILocalNotification *localNotification = [_bridge.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey];
+    [RNNotificationsBridgeQueue sharedInstance].openedLocalNotification = localNotification ? localNotification.userInfo : nil;
 }
 
 /*
@@ -513,6 +514,17 @@ RCT_EXPORT_METHOD(requestPermissionsWithCategories:(NSArray *)json)
     [RNNotifications requestPermissionsWithCategories:categories];
 }
 
+RCT_EXPORT_METHOD(getInitialNotification:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+    NSDictionary * notification = nil;
+    notification = [RNNotificationsBridgeQueue sharedInstance].openedRemoteNotification ?
+        [RNNotificationsBridgeQueue sharedInstance].openedRemoteNotification :
+        [RNNotificationsBridgeQueue sharedInstance].openedLocalNotification;
+    [RNNotificationsBridgeQueue sharedInstance].openedRemoteNotification = nil;
+    [RNNotificationsBridgeQueue sharedInstance].openedLocalNotification = nil;
+    resolve(notification);
+}
+
 RCT_EXPORT_METHOD(log:(NSString *)message)
 {
     NSLog(message);
@@ -531,6 +543,12 @@ RCT_EXPORT_METHOD(abandonPermissions)
 RCT_EXPORT_METHOD(registerPushKit)
 {
     [RNNotifications registerPushKit];
+}
+
+RCT_EXPORT_METHOD(getBadgesCount:(RCTResponseSenderBlock)callback)
+{
+    NSInteger count = [UIApplication sharedApplication].applicationIconBadgeNumber;
+    callback(@[ [NSNumber numberWithInteger:count] ]);
 }
 
 RCT_EXPORT_METHOD(setBadgesCount:(int)count)
