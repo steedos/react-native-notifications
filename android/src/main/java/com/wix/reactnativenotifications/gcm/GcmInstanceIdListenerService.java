@@ -2,6 +2,7 @@ package com.wix.reactnativenotifications.gcm;
 
 import android.content.Intent;
 
+import android.os.Build;
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
@@ -16,6 +17,10 @@ public class GcmInstanceIdListenerService extends InstanceIDListenerService {
         // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
         // Google recommends running this from an intent service.
         Intent intent = new Intent(this, GcmInstanceIdRefreshHandlerService.class);
-        startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 }

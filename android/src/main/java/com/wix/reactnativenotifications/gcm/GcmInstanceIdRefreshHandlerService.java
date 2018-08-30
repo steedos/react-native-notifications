@@ -1,6 +1,8 @@
 package com.wix.reactnativenotifications.gcm;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.os.Build;
 import android.content.Intent;
 
 public class GcmInstanceIdRefreshHandlerService extends IntentService {
@@ -10,6 +12,15 @@ public class GcmInstanceIdRefreshHandlerService extends IntentService {
 
     public GcmInstanceIdRefreshHandlerService() {
         super(GcmInstanceIdRefreshHandlerService.class.getSimpleName());
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForeground(1, new Notification());
+        }
+
     }
 
     @Override
