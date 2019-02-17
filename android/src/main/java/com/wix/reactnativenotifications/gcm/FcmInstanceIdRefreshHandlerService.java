@@ -5,13 +5,13 @@ import android.app.Notification;
 import android.os.Build;
 import android.content.Intent;
 
-public class GcmInstanceIdRefreshHandlerService extends IntentService {
+public class FcmInstanceIdRefreshHandlerService extends IntentService {
 
     public static String EXTRA_IS_APP_INIT = "isAppInit";
     public static String EXTRA_MANUAL_REFRESH = "doManualRefresh";
 
-    public GcmInstanceIdRefreshHandlerService() {
-        super(GcmInstanceIdRefreshHandlerService.class.getSimpleName());
+    public FcmInstanceIdRefreshHandlerService() {
+        super(FcmInstanceIdRefreshHandlerService.class.getSimpleName());
     }
 
     @Override
@@ -25,7 +25,7 @@ public class GcmInstanceIdRefreshHandlerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        IGcmToken gcmToken = GcmToken.get(this);
+        IFcmToken gcmToken = FcmToken.get(this);
         if (gcmToken == null) {
             return;
         }
