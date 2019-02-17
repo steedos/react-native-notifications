@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.VIBRATE" android:maxSdkVersion="18" />
 
     <application>
-
+        <receiver android:name="com.wix.reactnativenotifications.core.notification.PushNotificationPublisher" />
         <!--
          A proxy-service that gives the library an opportunity to do some work before launching/resuming the actual application task.
          -->

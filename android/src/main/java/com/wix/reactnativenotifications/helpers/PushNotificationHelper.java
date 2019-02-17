@@ -43,7 +43,7 @@ public class PushNotificationHelper {
         Intent notificationIntent = new Intent(mContext, PushNotificationPublisher.class);
         notificationIntent.putExtra(PushNotificationHelper.NOTIFICATION_ID, notificationId);
         notificationIntent.putExtras(bundle);
-        return PendingIntent.getBroadcast(mContext, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(mContext, notificationId.intValue(), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public boolean savePreferences(String id, PushNotificationProps notificationProps) {

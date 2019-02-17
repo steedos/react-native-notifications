@@ -67,7 +67,7 @@ public class PushNotification implements IPushNotification {
     }
 
     private static boolean verifyNotificationBundle(Bundle bundle) {
-        if (bundle.getString("google.message_id") != null) {
+        if (bundle.getString("google.message_id") != null || bundle.getString("localNotification") != null) {
             return true;
         }
 
@@ -108,9 +108,8 @@ public class PushNotification implements IPushNotification {
             Log.e(LOGTAG, "No date specified for the scheduled notification");
             return;
         }
-
         PushNotificationHelper helper = PushNotificationHelper.getInstance(mContext);
-        boolean isSaved = helper.savePreferences(Integer.toString(notificationId), mNotificationProps);
+        boolean isSaved = helper.savePreferences(notificationId.toString(), mNotificationProps);
         if (!isSaved) {
             Log.e(LOGTAG, "Failed to save preference for notificationId " + notificationId);
         }
@@ -144,6 +143,7 @@ public class PushNotification implements IPushNotification {
     protected void digestNotification() {
         if (!mAppLifecycleFacade.isReactInitialized()) {
             setAsInitialNotification();
+            launchOrResumeApp();
             return;
         }
 
@@ -173,6 +173,8 @@ public class PushNotification implements IPushNotification {
 
     protected void dispatchUponVisibility() {
         mAppLifecycleFacade.addVisibilityListener(getIntermediateAppVisibilityListener());
+        launchOrResumeApp();
+
     }
 
     protected AppVisibilityListener getIntermediateAppVisibilityListener() {
@@ -214,7 +216,7 @@ public class PushNotification implements IPushNotification {
     }
 
     protected int postNotification(Notification notification, Integer notificationId) {
-        int id = notificationId != null ? notificationId : createNotificationId(notification);
+        int id = notificationId != null ? notificationId.intValue() : createNotificationId(notification);
         postNotification(id, notification);
         return id;
     }
@@ -246,5 +248,10 @@ public class PushNotification implements IPushNotification {
 
     private void notifyOpenedToJS() {
         mJsIOHelper.sendEventToJS(NOTIFICATION_OPENED_EVENT_NAME, mNotificationProps.asBundle(), mAppLifecycleFacade.getRunningReactContext());
+    }
+
+    protected void launchOrResumeApp() {
+        final Intent intent = mAppLaunchHelper.getLaunchIntent(mContext);
+        mContext.startActivity(intent);
     }
 }
