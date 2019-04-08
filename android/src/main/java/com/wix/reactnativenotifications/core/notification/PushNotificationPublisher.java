@@ -17,8 +17,10 @@ public class PushNotificationPublisher extends BroadcastReceiver {
         Application applicationContext = (Application) context.getApplicationContext();
         final IPushNotification pushNotification = PushNotification.get(applicationContext, intent.getExtras());
 
-        Log.i("PN_TAG", "PushNotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
+        if (pushNotification != null) {
+            Log.i("PN_TAG", "PushNotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
 
-        pushNotification.sendNotificationScheduled(id);
+            pushNotification.sendNotificationScheduled(id);
+        }
     }
 }
