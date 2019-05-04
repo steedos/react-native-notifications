@@ -173,8 +173,10 @@ public class PushNotification implements IPushNotification {
 
     protected void dispatchUponVisibility() {
         mAppLifecycleFacade.addVisibilityListener(getIntermediateAppVisibilityListener());
-        launchOrResumeApp();
 
+        // Make the app visible so that we'll dispatch the notification opening when visibility changes to 'true' (see
+        // above listener registration).
+        launchOrResumeApp();
     }
 
     protected AppVisibilityListener getIntermediateAppVisibilityListener() {
@@ -211,7 +213,7 @@ public class PushNotification implements IPushNotification {
             notificationManager.createNotificationChannel(channel);
             notification.setChannelId(CHANNEL_ID);
         }
-        
+
         return notification;
     }
 
