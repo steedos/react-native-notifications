@@ -32,6 +32,30 @@
         <service
             android:name=".gcm.FcmInstanceIdRefreshHandlerService"
             android:exported="false" />
+
+        <!-- 
+           Huawei Push start
+        -->
+        <receiver android:name=".huawei.HuaweiInstanceIdListenerService"
+            android:permission="${applicationId}.permission.PROCESS_PUSH_MSG">
+            <intent-filter>
+                <!-- 必须,用于接收token -->
+                <action android:name="com.huawei.android.push.intent.REGISTRATION" />
+                <!-- 必须, 用于接收透传消息 -->
+                <action android:name="com.huawei.android.push.intent.RECEIVE" />
+                <!-- 必须, 用于接收通知栏消息点击事件 此事件不需要开发者处理，只需注册就可以-->
+                <action android:name="com.huawei.intent.action.PUSH_DELAY_NOTIFY"/>
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".huawei.HuaweiInstanceIdRefreshHandlerService"
+            android:exported="false" />
+        
+        <meta-data  
+            android:name="com.huawei.hms.client.appid"  
+            android:value="appid=100899531">  
+        </meta-data>   
     </application>
 
 </manifest>

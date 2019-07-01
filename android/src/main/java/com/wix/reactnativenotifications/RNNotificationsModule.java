@@ -32,6 +32,10 @@ import com.google.firebase.FirebaseApp;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
+import com.wix.reactnativenotifications.huawei.HuaweiInstanceIdRefreshHandlerService;
+import com.huawei.android.hms.agent.HMSAgent;
+import com.wix.reactnativenotifications.huawei.HuaweiToken;
+
 public class RNNotificationsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     public RNNotificationsModule(Application application, ReactApplicationContext reactContext) {
@@ -52,6 +56,11 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     public void initialize() {
         Log.d(LOGTAG, "Native module init");
         startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
+        HuaweiToken.mAppContext = getReactApplicationContext().getApplicationContext();
+        Log.d(LOGTAG, "mAppContext: " + HuaweiToken.mAppContext);
+        HuaweiToken.mReactAppContext = getReactApplicationContext();
+        Log.d(LOGTAG, "mReactAppContext: " + HuaweiToken.mReactAppContext);
+        startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
 
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
@@ -77,6 +86,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     public void refreshToken() {
         Log.d(LOGTAG, "Native method invocation: refreshToken()");
         startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH);
+        startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH);
+
     }
 
     @ReactMethod
@@ -145,6 +156,17 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     protected void startGcmIntentService(String extraFlag) {
         final Context appContext = getReactApplicationContext().getApplicationContext();
         final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
+        tokenFetchIntent.putExtra(extraFlag, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            appContext.startForegroundService(tokenFetchIntent);
+        } else {
+            appContext.startService(tokenFetchIntent);
+        }
+    }
+
+    protected void startHuaweiIntentService(String extraFlag) {
+        final Context appContext = getReactApplicationContext().getApplicationContext();
+        final Intent tokenFetchIntent = new Intent(appContext, HuaweiInstanceIdRefreshHandlerService.class);
         tokenFetchIntent.putExtra(extraFlag, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             appContext.startForegroundService(tokenFetchIntent);
