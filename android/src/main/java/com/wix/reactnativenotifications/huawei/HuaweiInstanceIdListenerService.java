@@ -10,6 +10,7 @@ import com.wix.reactnativenotifications.core.notification.IPushNotification;
 import com.wix.reactnativenotifications.core.notification.PushNotification;
 
 import java.util.Map;
+import java.util.Iterator;
 import java.nio.charset.Charset;
 
 import org.json.JSONObject;
@@ -40,10 +41,13 @@ public class HuaweiInstanceIdListenerService extends PushReceiver {
 
         Bundle bundle = new Bundle();
         try {
-            final JSONObject jo = new JSONObject(passThroughBody);
-            bundle.putString("title", jo.getString("title"));
-            bundle.putString("body", jo.getString("body"));
-            bundle.putString("badge", jo.getString("badge"));
+            final JSONObject jsonObj = new JSONObject(passThroughBody);
+            Iterator iterator = jsonObj.keys();
+            while(iterator.hasNext()){
+                String key = (String) iterator.next();//next方法，向下移动指针，并且返回指针指向的元素，如果指针指向的内存中没有元素，会报异常
+                String value = jsonObj.getString(key);
+                bundle.putString(key, value);
+            }
         } catch (Throwable t) {
             Log.e(LOGTAG, "failed to convert pass through body from json", t);
             bundle.putString("title", passThroughBody);
