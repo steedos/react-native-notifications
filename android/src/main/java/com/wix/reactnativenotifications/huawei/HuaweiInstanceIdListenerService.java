@@ -71,17 +71,4 @@ public class HuaweiInstanceIdListenerService extends PushReceiver {
         
     }
 
-
-    // public static Map<String, String> bundleToMap(Bundle bundle) {
-    //     if (bundle == null) {
-    //         return null;
-    //     }
-    //     Map<String, String> map = new HashMap<>();
-    //     for (String key : bundle.keySet()) {
-    //         Object value = bundle.get(key);
-    //         map.put(key, value.toString());
-    //     }
-    //     return map;
-    // }
-
 }
