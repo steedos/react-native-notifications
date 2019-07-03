@@ -54,14 +54,14 @@ public class HuaweiInstanceIdListenerService extends PushReceiver {
         }
 
         // Object pushMsg = extras.get("pushMsg");
-        Log.d(LOGTAG, "Message extraKV: " + bundle.toString());
+        Log.d(LOGTAG, "New message from Huawei: " + bundle.toString());
 
         try {
             final IPushNotification notification = PushNotification.get(HuaweiToken.mAppContext, bundle);
             if (notification != null) {
                 notification.onReceived();
+                return true;
             }
-            return true;
         } catch (IPushNotification.InvalidNotificationException e) {
             // A GCM message, yes - but not the kind we know how to work with.
             Log.v(LOGTAG, "Huawei Push message handling aborted", e);
