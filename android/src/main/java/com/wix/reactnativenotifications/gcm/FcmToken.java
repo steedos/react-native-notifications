@@ -18,7 +18,7 @@ public class FcmToken implements IFcmToken {
 
     final protected Context mAppContext;
 
-    protected static String sToken;
+    public static String sToken;
 
     protected FcmToken(Context appContext) {
         if (!(appContext instanceof ReactApplication)) {

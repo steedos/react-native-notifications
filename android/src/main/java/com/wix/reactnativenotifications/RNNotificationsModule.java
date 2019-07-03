@@ -58,37 +58,62 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     @Override
     public void initialize() {
         mReactAppContext = getReactApplicationContext();
-        mPushProvider = getPushProvider();
+        mPushProvider = getDefaultPushProvider();
         Log.d(LOGTAG, "Native module initialize for " + mPushProvider);
 
         if (mPushProvider == "huawei")
             startPushIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, HuaweiInstanceIdRefreshHandlerService.class);
         else if (mPushProvider == "xiaomi")
             startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, XiaomiInstanceIdRefreshHandlerService.class);
-        else
+        else {
             startPushIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, FcmInstanceIdRefreshHandlerService.class);
+            checkFcmSuccess();
+        }
 
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
+        checkFcmSuccess();
+
     }
 
-    public String getPushProvider() {
+    public void checkFcmSuccess() {
+
+        // If fcm failed (in china), rollback to xiaomi
+        if (mPushProvider != "fcm")
+            return;
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    this.sleep(10000);                    
+                } catch (InterruptedException e) {
+                }       
+                if (FcmToken.sToken == null) {
+                    mPushProvider = "xiaomi";
+                    startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, XiaomiInstanceIdRefreshHandlerService.class);
+                }    
+            }
+        }.start();
+    }
+
+    public String getDefaultPushProvider() {
         String deviceBrand = Build.BRAND;
         String manufacturer = Build.MANUFACTURER;
-        String pushProvider = "gcm";
-        if(manufacturer.equals("Xiaomi")
+        String pushProvider = "fcm";
+        if(manufacturer.toLowerCase().equals("xiaomi")
             || deviceBrand.contains("Xiaomi")
             || deviceBrand.contains("xiaomi") ){
                 pushProvider = "xiaomi";
-        } else if (manufacturer.equals("HUAWEI")
+        } else if (manufacturer.toLowerCase().equals("huawei")
         || deviceBrand.contains("HUAWEI")
         || deviceBrand.contains("Huawei")
         || deviceBrand.contains("huawei")
         || deviceBrand.contains("HONOR")
         || deviceBrand.contains("honor")){
-            pushProvider = "xiaomi";
+            pushProvider = "huawei";
         } else {
-            pushProvider = "xiaomi";
+            pushProvider = "fcm";
         }
         return pushProvider;
     }

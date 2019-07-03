@@ -11,6 +11,7 @@ import com.wix.reactnativenotifications.core.notification.PushNotification;
 import java.util.Map;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
+import com.wix.reactnativenotifications.RNNotificationsModule;
 
 /**
  * Instance-ID + token refreshing handling service. Contacts the GCM to fetch the updated token.
@@ -21,6 +22,10 @@ public class FcmInstanceIdListenerService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage message){
+
+        if (RNNotificationsModule.mPushProvider != "fcm")
+            return;
+
         Bundle bundle = message.toIntent().getExtras();
         Log.d(LOGTAG, "New message from GCM: " + bundle);
 

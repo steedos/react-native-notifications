@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 import com.wix.reactnativenotifications.gcm.IFcmToken;
+import com.wix.reactnativenotifications.RNNotificationsModule;
 
 import com.huawei.hms.support.api.push.PushReceiver;
 
@@ -35,6 +36,9 @@ public class HuaweiInstanceIdListenerService extends PushReceiver {
 
     @Override
     public boolean onPushMsg(Context context, byte[] msgBytes, Bundle extras) {
+
+        if (RNNotificationsModule.mPushProvider != "huawei")
+            return true;
 
         final String passThroughBody = new String(msgBytes, Charset.forName("UTF-8"));
         Log.d(LOGTAG, "New message from Huawei Push: " + passThroughBody);

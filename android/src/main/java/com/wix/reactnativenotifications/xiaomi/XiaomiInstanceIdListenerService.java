@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 import com.wix.reactnativenotifications.gcm.IFcmToken;
+import com.wix.reactnativenotifications.RNNotificationsModule;
 
 import com.xiaomi.mipush.sdk.ErrorCode;
 import com.xiaomi.mipush.sdk.MiPushClient;
@@ -56,6 +57,9 @@ public class XiaomiInstanceIdListenerService extends PushMessageReceiver {
 
     public void processNotificationMessage(String passThroughBody) { 
     
+        if (RNNotificationsModule.mPushProvider != "xiaomi")
+            return;
+
         Log.d(LOGTAG, "Xiaomi Push new message: " + passThroughBody);
 
         Bundle bundle = new Bundle();

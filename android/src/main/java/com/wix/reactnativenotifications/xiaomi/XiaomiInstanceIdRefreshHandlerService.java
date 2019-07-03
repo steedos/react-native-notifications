@@ -29,10 +29,6 @@ public class XiaomiInstanceIdRefreshHandlerService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         // Xiaomi Push needs CurrentActivity param to initialze, so wait 5 seconds for app startup
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e){
-        }
         IFcmToken xiaomiToken = XiaomiToken.get(this);
         if (xiaomiToken == null) {
             return;
