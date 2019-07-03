@@ -17,6 +17,7 @@ import static com.wix.reactnativenotifications.Defs.LOGTAG;
 import static com.wix.reactnativenotifications.Defs.TOKEN_RECEIVED_EVENT_NAME;
 import com.wix.reactnativenotifications.gcm.IFcmToken;
 import com.wix.reactnativenotifications.gcm.INotificationsGcmApplication;
+import com.wix.reactnativenotifications.RNNotificationsModule;
 
 import com.huawei.android.hms.agent.HMSAgent;
 import com.huawei.android.hms.agent.push.handler.GetTokenHandler;
@@ -26,7 +27,6 @@ import com.huawei.hms.support.api.push.TokenResult;
 public class HuaweiToken implements IFcmToken {
 
     public static Context mAppContext;
-    public static ReactApplicationContext mReactAppContext;
     
     protected static String sToken;
 
@@ -41,8 +41,8 @@ public class HuaweiToken implements IFcmToken {
     }
 
     private void connect() {
-        HMSAgent.init(mReactAppContext.getCurrentActivity());
-        HMSAgent.connect(mReactAppContext.getCurrentActivity(), new ConnectHandler() {
+        HMSAgent.init(RNNotificationsModule.mReactAppContext.getCurrentActivity());
+        HMSAgent.connect(RNNotificationsModule.mReactAppContext.getCurrentActivity(), new ConnectHandler() {
             @Override
             public void onConnect(int rst) {
                 Log.d(LOGTAG, "Huawei Push connect end:" + rst);
@@ -109,7 +109,7 @@ public class HuaweiToken implements IFcmToken {
 
         // Note: Cannot assume react-context exists cause this is an async dispatched service.
         if (reactContext != null && reactContext.hasActiveCatalystInstance()) {
-            //reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TOKEN_RECEIVED_EVENT_NAME, sToken);
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TOKEN_RECEIVED_EVENT_NAME, sToken);
         }
     }
 }

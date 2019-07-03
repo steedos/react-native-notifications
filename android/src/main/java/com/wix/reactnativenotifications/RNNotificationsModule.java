@@ -33,10 +33,12 @@ import com.google.firebase.FirebaseApp;
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
 import com.wix.reactnativenotifications.huawei.HuaweiInstanceIdRefreshHandlerService;
-import com.huawei.android.hms.agent.HMSAgent;
-import com.wix.reactnativenotifications.huawei.HuaweiToken;
+import com.wix.reactnativenotifications.gcm.FcmToken;
 
 public class RNNotificationsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+
+    public static ReactApplicationContext mReactAppContext;
+    public static String mPushProvider;
 
     public RNNotificationsModule(Application application, ReactApplicationContext reactContext) {
         super(reactContext);
@@ -55,15 +57,34 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     @Override
     public void initialize() {
         Log.d(LOGTAG, "Native module init");
-        startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
-        HuaweiToken.mAppContext = getReactApplicationContext().getApplicationContext();
-        Log.d(LOGTAG, "mAppContext: " + HuaweiToken.mAppContext);
-        HuaweiToken.mReactAppContext = getReactApplicationContext();
-        Log.d(LOGTAG, "mReactAppContext: " + HuaweiToken.mReactAppContext);
-        startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
+        mReactAppContext = getReactApplicationContext();
+        mPushProvider = getPushProvider();
+
+        if (mPushProvider == "huawei")
+            startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
+        else 
+            startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
 
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
+    }
+
+    public String getPushProvider() {
+        String deviceBrand = Build.BRAND;
+        String manufacturer = Build.MANUFACTURER;
+        String pushProvider = "gcm";
+        if(manufacturer.equals("Xiaomi")
+            || deviceBrand.contains("Xiaomi")
+            || deviceBrand.contains("xiaomi") ){
+        } else if (manufacturer.equals("HUAWEI")
+        || deviceBrand.contains("HUAWEI")
+        || deviceBrand.contains("Huawei")
+        || deviceBrand.contains("huawei")
+        || deviceBrand.contains("HONOR")
+        || deviceBrand.contains("honor")){
+            pushProvider = "huawei";
+        }
+        return pushProvider;
     }
 
     @Override
