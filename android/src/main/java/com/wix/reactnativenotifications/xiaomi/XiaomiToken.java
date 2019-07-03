@@ -1,8 +1,14 @@
-package com.wix.reactnativenotifications.huawei;
+package com.wix.reactnativenotifications.xiaomi;
+
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.app.ActivityManager;
 
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
@@ -19,44 +25,60 @@ import com.wix.reactnativenotifications.gcm.IFcmToken;
 import com.wix.reactnativenotifications.gcm.INotificationsGcmApplication;
 import com.wix.reactnativenotifications.RNNotificationsModule;
 
-import com.huawei.android.hms.agent.HMSAgent;
-import com.huawei.android.hms.agent.push.handler.GetTokenHandler;
-import com.huawei.android.hms.agent.common.handler.ConnectHandler;
-import com.huawei.hms.support.api.push.TokenResult;
+import com.xiaomi.mipush.sdk.MiPushClient;
 
-public class HuaweiToken implements IFcmToken {
+public class XiaomiToken implements IFcmToken {
 
-    public static Context mAppContext;
-    public static ReactApplicationContext mReactAppContext;
+    protected static Context mAppContext;
+    protected static ReactApplicationContext mReactAppContext;
+    private String mAppId;
+    private String mAppKey;
     
     protected static String sToken;
 
-    protected HuaweiToken(Context appContext) {
+    protected XiaomiToken(Context appContext) {
         if (!(appContext instanceof ReactApplication)) {
             throw new IllegalStateException("Application instance isn't a react-application");
         }
         mAppContext = appContext;
         mReactAppContext = RNNotificationsModule.mReactAppContext;
 
-        // Initialize Huawei Push
-        Log.d(LOGTAG, "Huawei Push initializing");
+        // Initialize Xiaomi Push
+        Log.d(LOGTAG, "Xiaomi Push initializing");
+
+        //读取小米对应的appId和appSecret
+        try {
+            Bundle metaData = mReactAppContext.getPackageManager().getApplicationInfo(mReactAppContext.getPackageName(), PackageManager.GET_META_DATA).metaData;
+            mAppId = metaData.getString("MI_PUSH_APP_ID").trim();
+            mAppKey = metaData.getString("MI_PUSH_APP_KEY").trim();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Log.e(LOGTAG, "can't find MI_PUSH_APP_ID or MI_PUSH_APP_KEY in AndroidManifest.xml");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Log.e(LOGTAG, "can't find MI_PUSH_APP_ID or MI_PUSH_APP_KEY in AndroidManifest.xml");
+        }
     }
 
-    private void connect() {
-        HMSAgent.init(mReactAppContext.getCurrentActivity());
-        HMSAgent.connect(mReactAppContext.getCurrentActivity(), new ConnectHandler() {
-            @Override
-            public void onConnect(int rst) {
-                Log.d(LOGTAG, "Huawei Push connect end:" + rst);
-            }
-        });
-    }
     public static IFcmToken get(Context context) {
         Context appContext = context.getApplicationContext();
         if (appContext instanceof INotificationsGcmApplication) {
             return ((INotificationsGcmApplication) appContext).getFcmToken(context);
         }
-        return new HuaweiToken(appContext);
+        return new XiaomiToken(appContext);
+    }
+
+    private boolean shouldInit() {
+        ActivityManager am = ((ActivityManager) mReactAppContext.getSystemService(Context.ACTIVITY_SERVICE));
+        List<ActivityManager.RunningAppProcessInfo> processInfos = am.getRunningAppProcesses();
+        String mainProcessName = mReactAppContext.getPackageName();
+        int myPid = android.os.Process.myPid();
+        for (ActivityManager.RunningAppProcessInfo info : processInfos) {
+            if (info.pid == myPid && mainProcessName.equals(info.processName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -82,27 +104,23 @@ public class HuaweiToken implements IFcmToken {
     @Override
     public void onAppReady() {
         synchronized (mAppContext) {
-            connect();
             if (sToken == null) {
-                Log.i(LOGTAG, "App initialized => huawei asking for new token");
+                Log.i(LOGTAG, "App initialized => Xiaomi asking for new token");
                 refreshToken();
             } else {
                 // Except for first run, this should be the case.
-                Log.i(LOGTAG, "App initialized => huawei publishing existing token ("+sToken+")");
+                Log.i(LOGTAG, "App initialized => Xiaomi publishing existing token ("+sToken+")");
                 sendTokenToJS();
             }
         }
     }
 
     protected void refreshToken() {
-        // Huawei Push GetToken
-        Log.d(LOGTAG, "Huawei Push refreshToken start");
-        HMSAgent.Push.getToken(new GetTokenHandler() {
-            @Override
-            public void onResult(int rtnCode) {
-                Log.d(LOGTAG, "Huawei Push refreshToken end: " + rtnCode);
-            }
-        }); 
+        // Xiaomi Push GetToken
+        Log.d(LOGTAG, "Xiaomi Push refreshToken start");
+        //if(shouldInit()) {
+        MiPushClient.registerPush(mReactAppContext.getApplicationContext(), mAppId, mAppKey);
+        //}
     }
 
     protected static void sendTokenToJS() {

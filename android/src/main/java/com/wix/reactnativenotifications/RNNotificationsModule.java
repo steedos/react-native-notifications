@@ -33,6 +33,7 @@ import com.google.firebase.FirebaseApp;
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
 import com.wix.reactnativenotifications.huawei.HuaweiInstanceIdRefreshHandlerService;
+import com.wix.reactnativenotifications.xiaomi.XiaomiInstanceIdRefreshHandlerService;
 import com.wix.reactnativenotifications.gcm.FcmToken;
 
 public class RNNotificationsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
@@ -56,14 +57,16 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     @Override
     public void initialize() {
-        Log.d(LOGTAG, "Native module init");
         mReactAppContext = getReactApplicationContext();
         mPushProvider = getPushProvider();
+        Log.d(LOGTAG, "Native module initialize for " + mPushProvider);
 
         if (mPushProvider == "huawei")
-            startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
-        else 
-            startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT);
+            startPushIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, HuaweiInstanceIdRefreshHandlerService.class);
+        else if (mPushProvider == "xiaomi")
+            startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, XiaomiInstanceIdRefreshHandlerService.class);
+        else
+            startPushIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, FcmInstanceIdRefreshHandlerService.class);
 
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
@@ -76,13 +79,16 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
         if(manufacturer.equals("Xiaomi")
             || deviceBrand.contains("Xiaomi")
             || deviceBrand.contains("xiaomi") ){
+                pushProvider = "xiaomi";
         } else if (manufacturer.equals("HUAWEI")
         || deviceBrand.contains("HUAWEI")
         || deviceBrand.contains("Huawei")
         || deviceBrand.contains("huawei")
         || deviceBrand.contains("HONOR")
         || deviceBrand.contains("honor")){
-            pushProvider = "huawei";
+            pushProvider = "xiaomi";
+        } else {
+            pushProvider = "xiaomi";
         }
         return pushProvider;
     }
@@ -106,9 +112,13 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     @ReactMethod
     public void refreshToken() {
         Log.d(LOGTAG, "Native method invocation: refreshToken()");
-        startGcmIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH);
-        startHuaweiIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH);
 
+        if (mPushProvider == "huawei")
+            startPushIntentService(HuaweiInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH, HuaweiInstanceIdRefreshHandlerService.class);
+        else if (mPushProvider == "xiaomi")
+            startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH, XiaomiInstanceIdRefreshHandlerService.class);
+        else
+            startPushIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_MANUAL_REFRESH, FcmInstanceIdRefreshHandlerService.class);
     }
 
     @ReactMethod
@@ -174,20 +184,9 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
         notificationDrawer.onCancelAllLocalNotifications();
     }
 
-    protected void startGcmIntentService(String extraFlag) {
+    protected void startPushIntentService(String extraFlag, Class pushClass) {
         final Context appContext = getReactApplicationContext().getApplicationContext();
-        final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
-        tokenFetchIntent.putExtra(extraFlag, true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            appContext.startForegroundService(tokenFetchIntent);
-        } else {
-            appContext.startService(tokenFetchIntent);
-        }
-    }
-
-    protected void startHuaweiIntentService(String extraFlag) {
-        final Context appContext = getReactApplicationContext().getApplicationContext();
-        final Intent tokenFetchIntent = new Intent(appContext, HuaweiInstanceIdRefreshHandlerService.class);
+        final Intent tokenFetchIntent = new Intent(appContext, pushClass);
         tokenFetchIntent.putExtra(extraFlag, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             appContext.startForegroundService(tokenFetchIntent);
