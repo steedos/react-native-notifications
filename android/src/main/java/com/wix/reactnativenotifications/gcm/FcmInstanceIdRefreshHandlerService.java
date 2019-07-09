@@ -2,6 +2,8 @@ package com.wix.reactnativenotifications.gcm;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.os.Build;
 import android.content.Intent;
 
@@ -18,7 +20,16 @@ public class FcmInstanceIdRefreshHandlerService extends IntentService {
     public void onCreate() {
         super.onCreate();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForeground(1, new Notification());
+            final String CHANNEL_ID = "channel_00";
+            final String CHANNEL_NAME = "Firebase Foreground service";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_LOW);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+            Notification.Builder notification = new Notification.Builder(this, CHANNEL_ID);
+//            notification.setChannelId(CHANNEL_ID);
+            startForeground(1, notification.build());
         }
 
     }
