@@ -33,9 +33,13 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation 'me.leolin:ShortcutBadger:1.1.16@aar'
 
+    // Huawei Push
     implementation 'com.huawei.android.hms:base:2.6.3.301'  
     implementation 'com.huawei.android.hms:push:2.6.3.301'  
-    implementation 'org.json:json:20171018'
+    implementation 'org.json:json:20180813'
+
+    // Xiaomi Push
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.+'
