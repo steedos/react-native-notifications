@@ -34,8 +34,8 @@ dependencies {
     implementation 'me.leolin:ShortcutBadger:1.1.16@aar'
 
     // Huawei Push
-    // implementation 'com.huawei.android.hms:base:2.6.3.301'  
-    // implementation 'com.huawei.android.hms:push:2.6.3.301'  
+    implementation 'com.huawei.android.hms:base:2.6.3.301'  
+    implementation 'com.huawei.android.hms:push:2.6.3.301'  
 
     // Xiaomi Push
     implementation fileTree(dir: 'libs', include: ['*.jar'])
