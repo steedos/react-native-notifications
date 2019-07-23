@@ -63,9 +63,11 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
         startPushIntentService(FcmInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, FcmInstanceIdRefreshHandlerService.class);
         try {
             Thread.sleep(1000);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Log.e(LOGTAG, e.toString());
         }
-        startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, XiaomiInstanceIdRefreshHandlerService.class);
+        if (FcmToken.sToken == null) 
+            startPushIntentService(XiaomiInstanceIdRefreshHandlerService.EXTRA_IS_APP_INIT, XiaomiInstanceIdRefreshHandlerService.class);
 
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
