@@ -26,6 +26,7 @@ import com.wix.reactnativenotifications.gcm.INotificationsGcmApplication;
 import com.wix.reactnativenotifications.RNNotificationsModule;
 
 import com.xiaomi.mipush.sdk.MiPushClient;
+import com.wix.reactnativenotifications.gcm.FcmToken;
 
 public class XiaomiToken implements IFcmToken {
 
@@ -52,10 +53,8 @@ public class XiaomiToken implements IFcmToken {
             mAppId = metaData.getString("MI_PUSH_APP_ID").trim();
             mAppKey = metaData.getString("MI_PUSH_APP_KEY").trim();
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
             Log.e(LOGTAG, "can't find MI_PUSH_APP_ID or MI_PUSH_APP_KEY in AndroidManifest.xml");
         } catch (NullPointerException e) {
-            e.printStackTrace();
             Log.e(LOGTAG, "can't find MI_PUSH_APP_ID or MI_PUSH_APP_KEY in AndroidManifest.xml");
         }
     }

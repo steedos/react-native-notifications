@@ -28,7 +28,7 @@
     <!-- 
         Permissions required for enabling Huawei.
     -->
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> -->
     
     <!-- 接收PUSH TOKEN的广播以及PUSH消息需要定义该权限 ${PACKAGE_NAME} 要替换上您应用的包名 -->
     <permission
@@ -64,7 +64,7 @@
         <!-- 
            Huawei Push start
         -->
-        <activity  
+        <!-- <activity  
             android:name="com.huawei.hms.activity.BridgeActivity"  
             android:configChanges="orientation|locale|screenSize|layoutDirection|fontScale"  
             android:excludeFromRecents="true"  
@@ -115,11 +115,8 @@
         <receiver android:name=".huawei.HuaweiInstanceIdListenerService"
             android:permission="${applicationId}.permission.PROCESS_PUSH_MSG">
             <intent-filter>
-                <!-- 必须,用于接收token -->
                 <action android:name="com.huawei.android.push.intent.REGISTRATION" />
-                <!-- 必须, 用于接收透传消息 -->
                 <action android:name="com.huawei.android.push.intent.RECEIVE" />
-                <!-- 必须, 用于接收通知栏消息点击事件 此事件不需要开发者处理，只需注册就可以-->
                 <action android:name="com.huawei.intent.action.PUSH_DELAY_NOTIFY"/>
             </intent-filter>
         </receiver>
@@ -131,7 +128,7 @@
         <meta-data  
             android:name="com.huawei.hms.client.appid"  
             android:value="appid=100899531">  
-        </meta-data>   
+        </meta-data>    -->
 
         <!-- 
             Xiaomi Push start 

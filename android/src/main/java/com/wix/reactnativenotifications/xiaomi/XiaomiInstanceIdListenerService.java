@@ -27,6 +27,8 @@ import com.xiaomi.mipush.sdk.MiPushCommandMessage;
 import com.xiaomi.mipush.sdk.MiPushMessage;
 import com.xiaomi.mipush.sdk.PushMessageReceiver;
 
+import com.wix.reactnativenotifications.gcm.FcmToken;
+
 public class XiaomiInstanceIdListenerService extends PushMessageReceiver {
 
 
@@ -39,15 +41,18 @@ public class XiaomiInstanceIdListenerService extends PushMessageReceiver {
         String cmdArg2 = ((arguments != null && arguments.size() > 1) ? arguments.get(1) : null);
         String log;
 
-        Log.d(LOGTAG, "Xiaomi Push onCommandResult " + command);
-
         int commandType = -1;
         if (MiPushClient.COMMAND_REGISTER.equals(command)) {
             if (message.getResultCode() == ErrorCode.SUCCESS) {
                 String mRegId = cmdArg1;
 
+                if (FcmToken.sToken != null) {
+                    Log.d(LOGTAG, "FCM exists, ignore xiaomi token: " + mRegId);
+                    return;
+                }
                 XiaomiToken.sToken = "xiaomi:" + mRegId;
                 XiaomiToken.sendTokenToJS();
+                RNNotificationsModule.mPushProvider = "xiaomi";
                 Log.d(LOGTAG, "Xiaomi Push GetToken success: " + mRegId);
             } else {
                 Log.e(LOGTAG, "Xiaomi Push GetToken failed.");
